@@ -5,15 +5,15 @@
 Aplicación fullstack para que un usuario autenticado gestione sus autos
 (`marca`, `modelo`, `año`, `placa`, `color`). El backend está partido en
 **2 microservicios hexagonales**, la BD es **SQL Server** corriendo en un
-contenedor dentro de una VM Multipass, y el frontend es **React + MUI**.
+contenedor dentro de una VM Multipass, y el frontend es **Angular 17 + Angular Material**.
 
 ## Diagrama
 
 ```
 ┌────────────────────┐        ┌────────────────────┐
-│  React (:5173)     │──────▶│ auth-service 8081   │──┐
-│  Vite + MUI        │        └────────────────────┘   │ JDBC
-│  axios + jwt       │        ┌────────────────────┐   │   ▼
+│ Angular (:4200)    │──────▶│ auth-service 8081   │──┐
+│ Angular Material   │        └────────────────────┘   │ JDBC
+│ HttpClient + JWT   │        ┌────────────────────┐   │   ▼
 │                    │──────▶│ cars-service 8082   │──┴──▶ SQL Edge :1433
 └────────────────────┘ JWT    └────────────────────┘       (schemas auth, cars)
                                                              └─ VM Multipass + Docker
@@ -23,7 +23,7 @@ contenedor dentro de una VM Multipass, y el frontend es **React + MUI**.
 
 | Componente     | Puerto | Responsabilidad                              |
 | -------------- | ------ | -------------------------------------------- |
-| Frontend (dev) | 5173   | UI + almacenamiento de JWT                   |
+| Frontend (dev) | 4200   | UI + almacenamiento de JWT                   |
 | auth-service   | 8081   | `/auth/register`, `/auth/login`, emite JWT   |
 | cars-service   | 8082   | CRUD de autos protegido con JWT              |
 | SQL Edge       | 1433   | `ufinet_autos` DB, schemas `auth` y `cars`   |
@@ -45,3 +45,4 @@ servicio verifica el token de forma independiente.
 - [07 — Casos de cambio](07-casos-de-cambio.md)
 - [08 — Estructura y mapa de archivos (¿dónde está X?)](08-estructura-y-controladores.md)
 - [09 — Glosario de conceptos](09-glosario-conceptos.md)
+- [10 — Frontend: migración React → Angular](10-frontend-angular-migracion.md)

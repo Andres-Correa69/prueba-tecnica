@@ -12,14 +12,15 @@ The backend is split into **two hexagonal Spring Boot microservices**:
 - **auth-service** (`services/auth-service`, port `:8081`) — `/auth/register`, `/auth/login`, issues HS256 JWTs.
 - **cars-service** (`services/cars-service`, port `:8082`) — CRUD of cars owned by the authenticated user.
 
-Frontend: `frontend/` — Vite + React 18 + TypeScript + MUI + react-router v6 + react-hook-form + zod + axios.
+Frontend: `frontend/` — Angular 17 (standalone components) + Angular Material 17 + Angular Router + Reactive Forms + HttpClient.
 
 Database: a single SQL Server (`ufinet_autos`) with two schemas (`auth`, `cars`) running inside
 Azure SQL Edge in a Multipass VM. Creation scripts live in `infra/sql/`. There is **no cross-schema
 foreign key** between `cars.Cars.user_id` and `auth.Users.id` — ownership is enforced in the
 application layer using the JWT `sub` claim (see `docs/02-microservicios.md`).
 
-Deep docs live in `docs/00-overview.md` (arch, hexagonal, microservices, JWT, FE, commands, study guide, change scenarios).
+Deep docs live in `docs/` (`00-overview.md` … `09-glosario-conceptos.md`) — start at `00-overview.md`
+for the architecture map; `07-casos-de-cambio.md` indexes "if they ask me to do X, where do I touch?".
 
 ## Tech Stack
 
@@ -38,12 +39,13 @@ prueba-tecnica/
 ├── services/
 │   ├── auth-service/          ← hexagonal: domain/application/infrastructure
 │   └── cars-service/          ← hexagonal + JWT auth filter + Specifications
-├── frontend/                  ← Vite + React + MUI
+├── frontend/                  ← Angular 17 + Angular Material (puerto 4200)
 ├── infra/
 │   ├── sql/*.sql              ← schemas + tables + optional seed
 │   ├── docker-compose.yml
 │   └── multipass/setup.md
-└── docs/00-overview.md … 07-casos-de-cambio.md
+├── postman/                   ← Ufinet-Autos collection + environment (manual API smoke tests)
+└── docs/00-overview.md … 09-glosario-conceptos.md
 ```
 
 Java base packages:
@@ -83,11 +85,15 @@ export JWT_SECRET='dev-secret-at-least-32-bytes-long!'
 export SPRING_PROFILES_ACTIVE=dev
 ```
 
-Frontend:
+Frontend (Angular):
 
 ```bash
-cd frontend && npm install && npm run dev           # http://localhost:5173
+cd frontend && npm install && npm run dev           # ng serve → http://localhost:4200
 ```
+
+El script `dev` ejecuta `ng serve --open`. El puerto 4200 está fijado
+en `angular.json` → `architect.serve.options.port` y coincide con el
+origen permitido por CORS en los dos `application.yml` del backend.
 
 ## Notes
 

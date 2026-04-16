@@ -73,8 +73,12 @@ export SPRING_PROFILES_ACTIVE=dev
 ```bash
 cd frontend
 npm install
-npm run dev          # abre http://localhost:5173
+npm run dev          # ng serve --open → http://localhost:4200
 ```
+
+> El script `dev` ejecuta `ng serve --open`. Si prefieres sin abrir el
+> navegador automático usa `npm start` o `npx ng serve`. El puerto
+> (4200) está fijado en `angular.json` → `architect.serve.options.port`.
 
 ## 6. Smoke test con curl
 

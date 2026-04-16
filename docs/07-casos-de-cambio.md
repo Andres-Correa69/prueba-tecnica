@@ -17,11 +17,14 @@
 6. **Commands**: `CreateCarCommand` / `UpdateCarCommand` añadir `String vin`.
 7. **Use cases**: `CreateCarService`, `UpdateCarService` pasar a `Vin.of(...)`.
 8. **DTOs REST**: `CarRequest`, `CarResponse`.
-9. **Frontend**:
-   - `src/api/carsApi.ts` interfaces.
-   - `src/schemas/carSchemas.ts` zod.
-   - `src/components/CarFormDialog.tsx` añadir TextField.
-   - Opcional: `src/components/CarTable.tsx` nueva columna.
+9. **Frontend (Angular)**:
+   - `src/app/core/api/cars-api.service.ts` → interfaces `Car` y `CarInput`.
+   - `src/app/shared/validators/form.validators.ts` → validador
+     dedicado (regex) + entrada en `firstErrorMessage()`.
+   - `src/app/shared/components/car-form-dialog/car-form-dialog.component.ts`
+     → añadir un `FormControl` y un `mat-form-field` en la grilla.
+   - Opcional: `src/app/shared/components/car-table/car-table.component.ts`
+     → añadir columna al `columns[]` + `ng-container matColumnDef`.
 
 Ruta crítica: si `ddl-auto=validate` no cuadra con el schema, la app no
 arranca y te avisa temprano.
@@ -64,9 +67,14 @@ entera — siguen viendo un JWT HS256 válido.
    en vez de header `Authorization`.
 3. `CorsConfig` (ambos): `setAllowCredentials(true)` y NO permitir
    `*` en origins.
-4. Frontend: `axios.defaults.withCredentials = true`. Elimina
-   `tokenStorage` y su interceptor de request.
-5. Añadir CSRF: token en un cookie + header personalizado.
+4. Frontend (Angular):
+   - En `HttpClient` pasar `{ withCredentials: true }` en cada request
+     (o registrarlo globalmente con un interceptor trivial).
+   - Borrar `TokenStorageService` y la rama que añade el Bearer en
+     `auth.interceptor.ts`; dejar solo el manejo de 401.
+5. Añadir CSRF: Angular tiene `HttpClientXsrfModule` que lee la cookie
+   `XSRF-TOKEN` y manda `X-XSRF-TOKEN` automáticamente; el backend debe
+   emitirla.
 
 ---
 

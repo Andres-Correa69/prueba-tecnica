@@ -7,7 +7,7 @@ autos (`marca`, `modelo`, `año`, `placa`, `color`).
 
 - **auth-service** (`:8081`) — Spring Boot 3.3, emite JWT HS256.
 - **cars-service** (`:8082`) — Spring Boot 3.3, CRUD protegido con JWT.
-- **frontend** (`:5173`) — Vite + React + MUI.
+- **frontend** (`:4200`) — Angular 17 + Angular Material.
 - **SQL Server** (`:1433`) — Azure SQL Edge en VM Multipass, schemas `auth` + `cars`.
 
 ## Quickstart (5 pasos)
@@ -51,10 +51,13 @@ Detalles y troubleshooting: **[docs/05-comandos.md](docs/05-comandos.md)**.
 | [docs/01-arquitectura-hexagonal.md](docs/01-arquitectura-hexagonal.md) | Ports & adapters, trazado end-to-end |
 | [docs/02-microservicios.md](docs/02-microservicios.md) | Por qué 2 servicios, cómo se comunican |
 | [docs/03-seguridad-jwt.md](docs/03-seguridad-jwt.md) | BCrypt, JWT, CORS, amenazas |
-| [docs/04-frontend.md](docs/04-frontend.md) | Vite, ProtectedRoute, axios, zod |
+| [docs/04-frontend.md](docs/04-frontend.md) | Angular 17: authGuard, HttpInterceptor, Reactive Forms |
 | [docs/05-comandos.md](docs/05-comandos.md) | Todos los comandos en orden |
 | [docs/06-que-estudiar.md](docs/06-que-estudiar.md) | Glosario para sustentar la prueba |
 | [docs/07-casos-de-cambio.md](docs/07-casos-de-cambio.md) | "Si me piden X, ¿dónde lo toco?" |
+| [docs/08-estructura-y-controladores.md](docs/08-estructura-y-controladores.md) | Mapa de archivos "¿dónde está X?" |
+| [docs/09-glosario-conceptos.md](docs/09-glosario-conceptos.md) | Diccionario de términos del proyecto |
+| [docs/10-frontend-angular-migracion.md](docs/10-frontend-angular-migracion.md) | Notas de la migración React → Angular |
 
 ## Tests
 

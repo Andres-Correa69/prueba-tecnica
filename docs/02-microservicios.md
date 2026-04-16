@@ -47,7 +47,8 @@ auth-service, el `sub` es un user id legítimo".
 
 ## ¿Qué falta para un deployment real? (API Gateway)
 
-Hoy, el frontend conoce dos URLs (`VITE_AUTH_URL`, `VITE_CARS_URL`). En
+Hoy, el frontend Angular conoce dos URLs (`environment.authUrl` y
+`environment.carsUrl`, declaradas en `src/environments/environment*.ts`). En
 producción lo habitual es poner un **Spring Cloud Gateway** o un
 proxy/Nginx adelante:
 

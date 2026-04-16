@@ -1,0 +1,199 @@
+/*
+ * Tema global de la aplicación.
+ *
+ * Portamos aquí las decisiones visuales que en la versión previa (React)
+ * vivían en `src/theme/index.ts` usando `createTheme` de MUI:
+ *   - Paleta azul profundo (#1e3a8a) + ámbar (#f59e0b).
+ *   - Fondo gris muy suave (#f5f7fb) para que las tarjetas resalten.
+ *   - Border radius generoso (12 px) para un look amigable.
+ *   - Sombras discretas (las de Material Design por defecto son muy
+ *     pesadas para un dashboard corporativo).
+ *
+ * Por qué SCSS y no un `MaterialModule` con un `$theme` mixin: en Angular
+ * Material 17 la API pública de tematización vive bajo `@use "@angular/material"`
+ * y requiere compilar SCSS. Centralizando todo aquí conseguimos exactamente
+ * lo mismo que el `createTheme` de MUI: rebrandeable desde un solo archivo.
+ */
+
+@use '@angular/material' as mat;
+@use 'sass:color';
+
+@include mat.core();
+
+// Paleta primaria (azul profundo). Generada manualmente desde #1e3a8a
+// para mantener la identidad visual que tenía la versión React en MUI.
+$ufinet-primary-palette: (
+  50:  #eef1fb,
+  100: #d5dcf4,
+  200: #aab7e8,
+  300: #7f91dd,
+  400: #5a71d0,
+  500: #1e3a8a,
+  600: #1a327a,
+  700: #152a67,
+  800: #0f2056,
+  900: #0f1d4a,
+  contrast: (
+    50:  #1f2937,
+    100: #1f2937,
+    200: #ffffff,
+    300: #ffffff,
+    400: #ffffff,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+  ),
+);
+
+// Paleta secundaria (ámbar).
+$ufinet-accent-palette: (
+  50:  #fff8e1,
+  100: #ffecb3,
+  200: #ffe082,
+  300: #ffd54f,
+  400: #ffca28,
+  500: #f59e0b,
+  600: #e78f07,
+  700: #d17b04,
+  800: #b45309,
+  900: #92400e,
+  contrast: (
+    50:  #1f2937,
+    100: #1f2937,
+    200: #1f2937,
+    300: #1f2937,
+    400: #1f2937,
+    500: #1f2937,
+    600: #1f2937,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+  ),
+);
+
+$ufinet-primary: mat.define-palette($ufinet-primary-palette, 500, 400, 900);
+$ufinet-accent:  mat.define-palette($ufinet-accent-palette, 500, 300, 800);
+$ufinet-warn:    mat.define-palette(mat.$red-palette, 500);
+
+// Tipografía: Inter con jerarquía equivalente a la del MUI theme.
+$ufinet-typography: mat.define-typography-config(
+  $font-family: '"Inter", "Segoe UI", system-ui, -apple-system, sans-serif',
+  $headline-1: mat.define-typography-level(96px, 112px, 700, $letter-spacing: -0.02em),
+  $headline-2: mat.define-typography-level(60px, 72px, 700, $letter-spacing: -0.02em),
+  $headline-3: mat.define-typography-level(48px, 56px, 700, $letter-spacing: -0.01em),
+  $headline-4: mat.define-typography-level(34px, 40px, 700, $letter-spacing: -0.01em),
+  $headline-5: mat.define-typography-level(24px, 32px, 600),
+  $headline-6: mat.define-typography-level(20px, 28px, 600),
+  $body-1:     mat.define-typography-level(16px, 24px, 400),
+  $body-2:     mat.define-typography-level(14px, 20px, 400),
+  $subtitle-1: mat.define-typography-level(16px, 24px, 500),
+  $subtitle-2: mat.define-typography-level(14px, 22px, 500),
+  $caption:    mat.define-typography-level(12px, 16px, 400),
+  $button:     mat.define-typography-level(14px, 20px, 600, $letter-spacing: 0),
+);
+
+$ufinet-theme: mat.define-light-theme((
+  color: (
+    primary: $ufinet-primary,
+    accent:  $ufinet-accent,
+    warn:    $ufinet-warn,
+  ),
+  typography: $ufinet-typography,
+  density: 0,
+));
+
+@include mat.all-component-themes($ufinet-theme);
+
+/* ============================================================
+ * Tokens de diseño accesibles desde cualquier componente.
+ * Se declaran como custom properties CSS para que el componente
+ * con estilos encapsulados pueda leerlos sin tocar la API de SCSS.
+ * ============================================================ */
+:root {
+  --app-bg: #f5f7fb;
+  --app-bg-paper: #ffffff;
+  --app-text-primary: #1f2937;
+  --app-text-secondary: #6b7280;
+  --app-divider: rgba(30, 58, 138, 0.08);
+  --app-primary: #1e3a8a;
+  --app-primary-light: #3b5bbf;
+  --app-primary-dark: #0f1d4a;
+  --app-accent: #f59e0b;
+  --app-success: #10b981;
+  --app-error: #ef4444;
+  --app-warning: #f59e0b;
+  --app-info: #3b82f6;
+  --app-radius: 12px;
+  --app-card-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 6px 24px rgba(15, 23, 42, 0.04);
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--app-bg);
+  color: var(--app-text-primary);
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Overrides visuales mínimos para acercarnos al look del MUI original
+ * sin reescribir todo el componente: border-radius más generoso y
+ * sombra discreta en las cards. */
+.mat-mdc-card {
+  border-radius: var(--app-radius) !important;
+  border: 1px solid rgba(30, 58, 138, 0.06);
+  box-shadow: var(--app-card-shadow) !important;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  box-shadow: 0 4px 14px rgba(30, 58, 138, 0.25);
+  &:hover {
+    box-shadow: 0 6px 20px rgba(30, 58, 138, 0.35);
+  }
+}
+
+.mat-mdc-header-row {
+  background-color: #f9fafb !important;
+}
+.mat-mdc-header-cell {
+  color: #374151 !important;
+  font-weight: 600 !important;
+}
+
+/* Helpers reutilizables. */
+.app-page {
+  min-height: 100dvh;
+  background: var(--app-bg);
+}
+
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+
+  @media (min-width: 900px) {
+    padding: 40px 24px;
+  }
+}
+
+.app-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.app-row > * {
+  flex: 1 1 0;
+  min-width: 0;
+}

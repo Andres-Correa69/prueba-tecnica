@@ -29,8 +29,11 @@ BEGIN
     VALUES (
         @demoUserId,
         N'demo',
-        -- Hash BCrypt($2a$10$...) de "Demo1234!" — regenéralo si el login falla.
-        N'$2a$10$wFqL7VrKk8zP1f4Q0q5Wp.G6Y9gC2XQqFt0ZJ2yM2WZ3yE5pP3s8y'
+        -- Hash BCrypt real de "Demo1234!" (cost=10), generado con
+        -- `htpasswd -nbB -C 10 demo 'Demo1234!'`. El prefijo `$2a$` /
+        -- `$2y$` es intercambiable: BCryptPasswordEncoder de Spring
+        -- Security acepta ambas variantes porque el algoritmo es idéntico.
+        N'$2a$10$pUFCnjyVyB716Tp86L4ELevV3Qcb0t2MJ6SNaouFLjUUQQExNl6BO'
     );
 END;
 GO

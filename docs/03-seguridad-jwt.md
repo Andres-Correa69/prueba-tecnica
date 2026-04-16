@@ -63,8 +63,9 @@ arquitecturas multi-equipo, la recomendación es RS256 + JWKS.
 
 - El navegador, antes de `POST /auth/login` con content-type JSON, envía
   un **preflight** `OPTIONS` al mismo path.
-- `CorsConfig` en ambos servicios lista `http://localhost:5173` como
-  origen permitido y `Authorization, Content-Type` como headers.
+- `CorsConfig` en ambos servicios lista `http://localhost:4200` como
+  origen permitido (dev server de Angular CLI) y `Authorization, Content-Type`
+  como headers.
 - En producción lo reemplazas por el dominio real.
 
 ## Defensas ya aplicadas
@@ -77,7 +78,7 @@ arquitecturas multi-equipo, la recomendación es RS256 + JWKS.
 | **IDOR** (404 vs 403)             | Devolvemos 404, no 403, para no filtrar existencia de la fila.             |
 | **SQL injection**                 | Todo va por JPA / Criteria — zero concatenación de strings.                |
 | **CSRF**                          | API stateless + no cookies → CSRF no aplica.                               |
-| **XSS que robe el JWT**           | (mitigación residual) CSP + no `v-html` + React escapa por defecto. Ver trade-off localStorage en `04-frontend.md`. |
+| **XSS que robe el JWT**           | (mitigación residual) CSP + Angular interpola con `{{ }}` (escape por defecto) y el template compiler rechaza `[innerHTML]` sin `DomSanitizer`. Ver trade-off localStorage en `04-frontend.md`. |
 | **Secreto débil**                 | `JwtTokenIssuerAdapter` rechaza claves `<32 bytes` al arrancar.            |
 
 ## Defensas pendientes (para la defensa de la prueba)

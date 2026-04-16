@@ -12,8 +12,8 @@ import java.util.List;
 /**
  * Configuración de CORS.
  *
- * <p>El dev server de React corre en {@code http://localhost:5173}; sin
- * CORS el navegador bloquearía cada XHR desde ahí. Mantenemos los orígenes
+ * <p>El dev server de Angular (`ng serve`) corre en {@code http://localhost:4200};
+ * sin CORS el navegador bloquearía cada XHR desde ahí. Mantenemos los orígenes
  * permitidos acotados (no {@code *}) incluso en dev, para detectar configuraciones
  * incorrectas temprano.</p>
  */

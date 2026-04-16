@@ -119,11 +119,11 @@ hacer peticiones a un backend.
 intenta hacer `fetch('http://banco.com/transferir')`, el banco debe
 haber permitido explícitamente ese origen, o el navegador lo bloquea.
 
-**Ejemplo aquí.** El frontend vive en `http://localhost:5173` y ambos
-backends en `:8081` y `:8082`. Como son orígenes distintos (puerto diferente),
-se necesita CORS. Mira `CorsConfig.java`: permite solo
-`http://localhost:5173`, métodos GET/POST/PUT/DELETE/OPTIONS y el header
-`Authorization`.
+**Ejemplo aquí.** El frontend vive en `http://localhost:4200` (dev
+server del Angular CLI) y ambos backends en `:8081` y `:8082`. Como son
+orígenes distintos (puerto diferente), se necesita CORS. Mira
+`CorsConfig.java`: permite solo `http://localhost:4200`, métodos
+GET/POST/PUT/DELETE/OPTIONS y el header `Authorization`.
 
 ---
 
@@ -140,14 +140,17 @@ navegador NO envía automáticamente. Por eso tenemos
 
 ---
 
-## DataGrid (MUI X)
+## mat-table + mat-paginator (Angular Material)
 
-**Qué es.** Componente de tabla de Material UI con paginación, sorting,
-filtros y acciones por fila incluidas.
+**Qué es.** Componentes de tabla y paginador del Angular Material CDK.
+Equivalentes funcionales del `DataGrid` de MUI que usaba la primera
+versión del frontend.
 
-**Ejemplo aquí.** `CarTable.tsx`. Le decimos `paginationMode="server"` para
-que no pagine en el cliente: cada cambio de página manda una nueva
-petición con `?page=&size=` al backend.
+**Ejemplo aquí.** `car-table.component.ts`. La tabla recibe sus datos
+directamente por `@Input() rows`; el paginador emite `(page)` hacia la
+página `CarsPage`, que es quien llama al backend con `?page=&size=`.
+Paginación estrictamente **server-side** — no queremos traer 5 000
+autos a memoria por si el usuario llega algún día a tener tantos.
 
 ---
 
@@ -436,24 +439,35 @@ public final class Anio {
 
 ---
 
-## Zod
+## Validación de formularios (Angular Reactive Forms)
 
-**Qué es.** Librería TypeScript para describir y validar la forma de los
-datos. Parecido a Bean Validation pero en el cliente.
+**Qué es.** Validación declarativa de formularios. En Angular la
+implementamos con **Reactive Forms + `Validators`** nativos y, cuando
+hace falta algo no cubierto (política de contraseña, formato de placa),
+validadores propios que devuelven un objeto de errores.
 
-**Ejemplo aquí.** `carSchemas.ts`:
+**Ejemplo aquí.** `form.validators.ts`:
 ```ts
-export const carFormSchema = z.object({
-  marca: z.string().min(1).max(50),
-  anio: z.coerce.number().int().min(1900).max(currentYear + 1),
-  placa: z.string().regex(/^[A-Z0-9]{3}-?[A-Z0-9]{3}$/),
-  ...
-});
+export const placaValidators: ValidatorFn[] = [
+  Validators.required,
+  Validators.pattern(/^[A-Z0-9]{3}-?[A-Z0-9]{3}$/),
+];
+
+export function passwordHasLettersAndDigits(): ValidatorFn {
+  return (control) => {
+    const v = control.value ?? '';
+    if (!v) return null;
+    return /[A-Za-z]/.test(v) && /\d/.test(v)
+      ? null
+      : { passwordComposition: true };
+  };
+}
 ```
 
-Se conecta a `react-hook-form` vía `@hookform/resolvers/zod` y aporta:
-- Validación en tiempo real mientras escribes.
-- Tipado de TypeScript automático (`CarFormValues = z.infer<...>`).
+Se conectan al `FormGroup` a través del `FormBuilder`, emiten errores
+por control (`control.errors.required`, etc.), y la función
+`firstErrorMessage(control)` los traduce al mismo español que veía el
+usuario en la versión React.
 
 ---
 

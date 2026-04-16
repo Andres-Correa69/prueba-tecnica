@@ -21,7 +21,7 @@ prueba-tecnica/
 │   ├── auth-service/                 ← microservicio de autenticación (puerto 8081)
 │   └── cars-service/                 ← microservicio de autos (puerto 8082)
 │
-├── frontend/                         ← Vite + React + MUI (puerto 5173)
+├── frontend/                         ← Angular 17 + Angular Material (puerto 4200)
 │
 ├── infra/
 │   ├── sql/{01,02,03}.sql            ← schemas, tablas, seed
@@ -38,7 +38,8 @@ prueba-tecnica/
 │   ├── 06-que-estudiar.md
 │   ├── 07-casos-de-cambio.md
 │   ├── 08-estructura-y-controladores.md   ← este archivo
-│   └── 09-glosario-conceptos.md
+│   ├── 09-glosario-conceptos.md
+│   └── 10-frontend-angular-migracion.md
 │
 └── postman/
     ├── Ufinet-Autos.postman_collection.json
@@ -199,34 +200,35 @@ Base: `services/cars-service/src/main/java/develope/cars/`
 
 ---
 
-## 🎨 Guía "Busco X, ¿dónde está?" — Frontend
+## 🎨 Guía "Busco X, ¿dónde está?" — Frontend (Angular)
 
 Base: `frontend/src/`
 
 | Busco… | Archivo |
 |--------|---------|
-| Punto de entrada de React | `main.tsx` |
-| Ruteo | `App.tsx` |
-| Tema de MUI (colores, tipografía, radios) | `theme/index.ts` |
-| Contexto de autenticación | `auth/AuthContext.tsx` |
-| Guardia de rutas | `auth/ProtectedRoute.tsx` |
-| Guardado del token en localStorage | `auth/tokenStorage.ts` |
-| Cliente axios de auth-service | `api/axiosAuth.ts` |
-| Cliente axios de cars-service (con interceptors) | `api/axiosCars.ts` |
-| Llamadas a /auth/register, /auth/login | `api/authApi.ts` |
-| Llamadas a /cars/* | `api/carsApi.ts` |
-| Esquemas zod de login/registro | `schemas/authSchemas.ts` |
-| Esquemas zod de crear/editar auto | `schemas/carSchemas.ts` |
-| Página de login | `pages/LoginPage.tsx` |
-| Página de registro | `pages/RegisterPage.tsx` |
-| Página principal (tabla + stats + filtros) | `pages/CarsPage.tsx` |
-| Página 404 | `pages/NotFoundPage.tsx` |
-| Layout común login/registro | `components/AuthLayout.tsx` |
-| Barra de navegación superior | `components/NavBar.tsx` |
-| Tabla de autos (MUI DataGrid) | `components/CarTable.tsx` |
-| Modal crear/editar | `components/CarFormDialog.tsx` |
-| Modal de confirmación de borrado | `components/ConfirmDeleteDialog.tsx` |
-| Barra de filtros con debounce | `components/SearchFilters.tsx` |
+| Punto de entrada (bootstrapApplication) | `main.ts` |
+| Componente raíz (sólo `<router-outlet />`) | `app/app.component.ts` |
+| Providers globales (router, http, interceptor, animations) | `app/app.config.ts` |
+| Tabla de rutas + `authGuard` + lazy loading | `app/app.routes.ts` |
+| Tema global Material (paleta + tipografía + overrides) | `src/styles.scss` |
+| Variables de entorno (URLs de los microservicios) | `src/environments/environment*.ts` |
+| Servicio de autenticación (signals + auto-logout) | `app/core/auth/auth.service.ts` |
+| Guard de rutas privadas (`CanActivateFn`) | `app/core/auth/auth.guard.ts` |
+| Interceptor HTTP (Bearer + manejo de 401) | `app/core/auth/auth.interceptor.ts` |
+| Guardado del token en localStorage | `app/core/auth/token-storage.service.ts` |
+| Llamadas a /auth/register, /auth/login | `app/core/api/auth-api.service.ts` |
+| Llamadas a /cars/* | `app/core/api/cars-api.service.ts` |
+| Validadores reutilizables + mensajes i18n | `app/shared/validators/form.validators.ts` |
+| Página de login | `app/pages/login/login.page.ts` |
+| Página de registro | `app/pages/register/register.page.ts` |
+| Página principal (tabla + stats + filtros) | `app/pages/cars/cars.page.ts` |
+| Página 404 | `app/pages/not-found/not-found.page.ts` |
+| Layout común login/registro | `app/shared/components/auth-layout/auth-layout.component.ts` |
+| Barra de navegación superior | `app/shared/components/nav-bar/nav-bar.component.ts` |
+| Tabla de autos (mat-table + mat-paginator) | `app/shared/components/car-table/car-table.component.ts` |
+| Modal crear/editar | `app/shared/components/car-form-dialog/car-form-dialog.component.ts` |
+| Modal de confirmación de borrado | `app/shared/components/confirm-delete-dialog/confirm-delete-dialog.component.ts` |
+| Barra de filtros con debounce 350 ms | `app/shared/components/search-filters/search-filters.component.ts` |
 
 ---
 
@@ -248,7 +250,7 @@ Durante la demo, si te preguntan algo, debes encontrarlo en máximo 3 clics:
 2. **`/lógica de negocio`** → `application/usecase/`
 3. **`/reglas de validación de datos`** → `domain/vo/`
 4. **`/configuración (Spring, security, JWT)`** → `infrastructure/config/`
-5. **`/pantallas`** → `frontend/src/pages/`
-6. **`/componentes reutilizables`** → `frontend/src/components/`
+5. **`/pantallas`** → `frontend/src/app/pages/`
+6. **`/componentes reutilizables`** → `frontend/src/app/shared/components/`
 
 Memoriza esos 6 caminos y el mapa del repo queda en tu cabeza.

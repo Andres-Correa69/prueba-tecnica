@@ -175,15 +175,15 @@ export SQL_HOST=192.168.2.2 SQL_PASSWORD='Ufinet#2026_Strong' \
 ./gradlew :services:cars-service:bootRun
 ```
 
-### Terminal 3 — frontend (puerto 5173)
+### Terminal 3 — frontend Angular (puerto 4200)
 
 ```bash
 cd /Users/andrescorrea69/Documents/GitHub/prueba-tecnica/frontend
-npm install           # solo la primera vez
-npm run dev
+npm install           # solo la primera vez (instala @angular/* 17, @angular/material 17)
+npm run dev           # ejecuta `ng serve --open`
 ```
 
-Abre el navegador en `http://localhost:5173`.
+Abre el navegador en `http://localhost:4200`.
 
 ---
 
@@ -191,7 +191,7 @@ Abre el navegador en `http://localhost:5173`.
 
 ### A. Desde el navegador (lo más vistoso)
 
-1. Abres `http://localhost:5173` → te redirige a `/login`.
+1. Abres `http://localhost:4200` → te redirige a `/login`.
 2. Click en "Regístrate" → usuario `andres`, password `Test1234!` → te loguea automáticamente y te lleva a `/cars`.
 3. Click en "Nuevo auto" → llena datos (marca `Toyota`, modelo `Corolla`, año `2020`, placa `ABC123`, color `Rojo`) → "Crear".
 4. El auto aparece en la tabla. Prueba editar, buscar por placa, eliminar.
@@ -256,7 +256,7 @@ Para correr un test individual:
 | Spring falla con `Cannot open database "ufinet_autos"` | No creaste la DB | Ejecuta paso 3.1. |
 | Spring falla con `Schema-validation` | Hibernate vs tablas no cuadran | Re-ejecuta `02-create-tables.sql`. |
 | Cars 401 en todas las rutas | JWT_SECRET distinto en cada servicio | Exporta la MISMA variable antes de `bootRun`. |
-| Frontend CORS error | auth/cars NO tienen `http://localhost:5173` permitido | Ya está configurado; revisa que FE realmente corre en `:5173`. |
+| Frontend CORS error | auth/cars NO tienen `http://localhost:4200` permitido | Ya está configurado; revisa que FE realmente corre en `:4200` y que el valor de `app.cors.allowed-origins` en ambos `application.yml` coincide. |
 | `Connection timed out` al 192.168.2.2 | Firewall o VM no expone el puerto | Dentro de la VM: `sudo ufw status`; si está activo, `sudo ufw allow 1433/tcp`. |
 
 ---
@@ -264,7 +264,7 @@ Para correr un test individual:
 ## 9. Parar todo al final de la demo
 
 ```bash
-# Ctrl+C en las 3 terminales para detener Spring + Vite
+# Ctrl+C en las 3 terminales para detener Spring + `ng serve`
 # Detener el contenedor SQL (los datos se preservan en el volumen)
 multipass exec close-bluebill -- docker stop sqledge
 # O apagar la VM entera
