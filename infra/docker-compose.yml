@@ -1,0 +1,24 @@
+# Archivo compose ligero para ejecutar SQL Server (Azure SQL Edge) dentro
+# de la VM de Multipass. En ARM64 (Apple Silicon) `azure-sql-edge` es la
+# imagen nativa amigable; en x86-64 también funciona la más común
+# `mssql/server:2022-latest` y puedes cambiar la línea `image:` abajo.
+#
+# El volumen nombrado `sqlvol` conserva los datos a través de
+# `docker compose down` — esto es crítico para el demo: perder la BD
+# entre ejecuciones significa perder el usuario y los autos sembrados y
+# tener que volver a ejecutar los scripts SQL.
+services:
+  sqledge:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    container_name: sqledge
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "1"
+      MSSQL_SA_PASSWORD: "${SQL_PASSWORD:-Ufinet#2026_Strong}"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlvol:/var/opt/mssql
+
+volumes:
+  sqlvol:

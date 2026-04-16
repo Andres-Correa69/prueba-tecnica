@@ -1,0 +1,268 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef0123456789",
+    "name": "Ufinet Autos",
+    "description": "Colección de la prueba técnica. Dos microservicios:\n\n- **auth-service** (`{{authUrl}}`) → `/auth/register`, `/auth/login`.\n- **cars-service** (`{{carsUrl}}`) → CRUD de `/cars` protegido con JWT.\n\n## Uso\n\n1. Importa esta colección y el archivo `Ufinet-Autos.postman_environment.json`.\n2. Selecciona el entorno **Ufinet Autos (local)**.\n3. Ejecuta **Auth → Register** (o **Login** si ya tienes usuario).\n4. El test script guarda automáticamente el `token` en la variable de entorno — las demás peticiones lo usan vía el header `Authorization: Bearer {{token}}`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Endpoints públicos de auth-service.",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('userId', body.userId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{authUrl}}/auth/register",
+              "host": ["{{authUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Crea un usuario nuevo.\n\n- 201 con `{userId, username}` si todo OK.\n- 400 si la validación falla (usuario muy corto, contraseña débil, etc.).\n- 409 si el username ya existe."
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('token', body.token);",
+                  "pm.collectionVariables.set('userId', body.userId);",
+                  "console.log('Token guardado hasta', body.expiresAt);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{authUrl}}/auth/login",
+              "host": ["{{authUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Devuelve `{token, userId, username, expiresAt}`.\n\nEl `test script` guarda el token en la variable `{{token}}` para que todas las demás requests lo usen automáticamente."
+          }
+        },
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{authUrl}}/actuator/health",
+              "host": ["{{authUrl}}"],
+              "path": ["actuator", "health"]
+            },
+            "description": "Liveness probe. Devuelve `{status: UP}`."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cars",
+      "description": "Endpoints de cars-service. Todos requieren Bearer token.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Listar autos (sin filtros)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "if (body.content && body.content.length > 0) {",
+                  "  pm.collectionVariables.set('carId', body.content[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{carsUrl}}/cars?page=0&size=10",
+              "host": ["{{carsUrl}}"],
+              "path": ["cars"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            },
+            "description": "Paginado. Respuesta: `{content: Car[], page, size, total}`.\n\nGuarda el id del primer auto en `{{carId}}` para usar en las otras peticiones."
+          }
+        },
+        {
+          "name": "Listar autos (con filtros)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{carsUrl}}/cars?placa=ABC&marca=Toyota&anio=2020&page=0&size=20&sort=placa,asc",
+              "host": ["{{carsUrl}}"],
+              "path": ["cars"],
+              "query": [
+                { "key": "placa", "value": "ABC", "description": "filtro parcial case-insensitive" },
+                { "key": "modelo", "value": "", "disabled": true },
+                { "key": "marca", "value": "Toyota", "description": "coincidencia exacta" },
+                { "key": "anio", "value": "2020" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" },
+                { "key": "sort", "value": "placa,asc", "description": "field,asc|desc — default createdAt,desc" }
+              ]
+            },
+            "description": "Combina cualquier subconjunto de filtros. Valores vacíos = sin restricción."
+          }
+        },
+        {
+          "name": "Obtener auto por id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{carsUrl}}/cars/{{carId}}",
+              "host": ["{{carsUrl}}"],
+              "path": ["cars", "{{carId}}"]
+            },
+            "description": "Devuelve 200 con el Car, o 404 si no existe o si pertenece a otro usuario (no se filtra existencia)."
+          }
+        },
+        {
+          "name": "Crear auto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('carId', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marca\": \"Toyota\",\n  \"modelo\": \"Corolla\",\n  \"anio\": 2020,\n  \"placa\": \"ABC123\",\n  \"color\": \"Rojo\",\n  \"fotoUrl\": null\n}"
+            },
+            "url": {
+              "raw": "{{carsUrl}}/cars",
+              "host": ["{{carsUrl}}"],
+              "path": ["cars"]
+            },
+            "description": "201 con el Car creado. 409 si la placa ya existe (a nivel global, no por usuario). 401 sin token."
+          }
+        },
+        {
+          "name": "Actualizar auto",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marca\": \"Toyota\",\n  \"modelo\": \"Corolla\",\n  \"anio\": 2020,\n  \"placa\": \"ABC123\",\n  \"color\": \"Azul\",\n  \"fotoUrl\": \"https://picsum.photos/400/300\"\n}"
+            },
+            "url": {
+              "raw": "{{carsUrl}}/cars/{{carId}}",
+              "host": ["{{carsUrl}}"],
+              "path": ["cars", "{{carId}}"]
+            },
+            "description": "200 con el Car actualizado. 404 si el id no existe o no te pertenece."
+          }
+        },
+        {
+          "name": "Eliminar auto",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{carsUrl}}/cars/{{carId}}",
+              "host": ["{{carsUrl}}"],
+              "path": ["cars", "{{carId}}"]
+            },
+            "description": "204 sin body si se eliminó. 404 si el id no existe o no te pertenece."
+          }
+        },
+        {
+          "name": "Health",
+          "auth": { "type": "noauth" },
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{carsUrl}}/actuator/health",
+              "host": ["{{carsUrl}}"],
+              "path": ["actuator", "health"]
+            }
+          }
+        },
+        {
+          "name": "Listar sin token (debe dar 401)",
+          "auth": { "type": "noauth" },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{carsUrl}}/cars",
+              "host": ["{{carsUrl}}"],
+              "path": ["cars"]
+            },
+            "description": "Caso negativo: sin Authorization header debe responder 401 con `{code:\"UNAUTHORIZED\", message, timestamp, path}`."
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "authUrl", "value": "http://localhost:8081", "type": "string" },
+    { "key": "carsUrl", "value": "http://localhost:8082", "type": "string" },
+    { "key": "username", "value": "andres", "type": "string" },
+    { "key": "password", "value": "Test1234!", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "userId", "value": "", "type": "string" },
+    { "key": "carId", "value": "", "type": "string" }
+  ]
+}

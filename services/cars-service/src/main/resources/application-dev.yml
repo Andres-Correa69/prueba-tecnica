@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:sqlserver://${SQL_HOST}:1433;databaseName=ufinet_autos;encrypt=false;trustServerCertificate=true
+    username: sa
+    password: ${SQL_PASSWORD}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServerDialect
+        format_sql: true
+    show-sql: false
